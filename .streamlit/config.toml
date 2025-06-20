@@ -2,3 +2,5 @@
 base = "light"
 [server]
 runOnSave = true
+[python]
+version = "3.10"
