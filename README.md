@@ -1,2 +1,2 @@
 # holitica-dashboard
-Data analysis for marketing examples
+Data analysis | E-Commence | Customer behaviour
