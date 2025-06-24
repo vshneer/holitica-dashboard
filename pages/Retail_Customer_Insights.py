@@ -3,8 +3,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
-from src.rfm import build_rfm
+from shared.rfm import build_rfm
 
+st.set_page_config(page_title="Retail Customer Insights", page_icon="📊")
 
 ### Calculate RFM and merge
 
@@ -16,7 +17,7 @@ df['CustomerID'] = df['CustomerID'].astype(int)
 # Make sure InvoiceDate is in datetime format
 df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'])
 
-rfm = build_rfm(df)
+rfm = build_rfm(df, 'InvoiceDate', 'InvoiceNo', 'CustomerID', 'Revenue')
 # Merge RFM table (with CustomerID, Segment) back to the main DataFrame
 df_merged = df.merge(rfm[['Segment']], on='CustomerID')
 
@@ -30,10 +31,10 @@ others_label = 'Others'
 
 st.title("Retail Customer Insights")
 st.write("#### Raw Data sample")
-st.caption("Dataset is made of ~0.5M UK-based non-store online retail transactions")
+st.caption("Dataset is made of ~0.5M UK-based non-store online retail transactions. A few rows sample: ")
 st.table(df_merged[["InvoiceNo", "Description", "Revenue", "Segment"]].head(3))
-st.caption("There are other columns for customer and product ids")
-st.caption("For presentation purposes data cleaning, preparation and RFM calculations are already performed")
+st.caption("There are more columns, like customer and product ids.")
+st.caption("For presentation purposes data cleaning, preparation and RFM calculations are already performed.")
 
 
 ### Customer vs Revenue share
@@ -183,7 +184,7 @@ st.caption("Products that are popular in the group but chosen Customer haven't t
 st.dataframe(recommended.reset_index().rename(columns={'Description': 'Product', 'Quantity': 'Group Demand'}))
 
 st.markdown("---")
-st.write("## What Else We Can Do")
+st.write("### What Else We Can Do")
 
 st.markdown("""
 We offer tailored data analysis and modeling services to help you grow your online business.  

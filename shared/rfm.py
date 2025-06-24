@@ -15,20 +15,20 @@ def segment_customer(row):
     else:
         return 'Others'
 
-def build_rfm(df):
-    snapshot_date = df['InvoiceDate'].max() + dt.timedelta(days=1)
+def build_rfm(df, date_field, order_id_field, customer_id_field, monetary_field):
+    snapshot_date = df[date_field].max() + dt.timedelta(days=1)
     # Group by CustomerID and aggregate
-    rfm = df.groupby('CustomerID').agg({
-        'InvoiceDate': lambda x: (snapshot_date - x.max()).days,  # Recency
-        'InvoiceNo': 'nunique',  # Frequency
-        'Revenue': 'sum'  # Monetary
+    rfm = df.groupby(customer_id_field).agg({
+        date_field: lambda x: (snapshot_date - x.max()).days,  # Recency
+        order_id_field: 'nunique',  # Frequency
+        monetary_field: 'sum'  # Monetary
     })
 
     # Rename columns for clarity
     rfm.rename(columns={
-        'InvoiceDate': 'Recency',
-        'InvoiceNo': 'Frequency',
-        'Revenue': 'Monetary'
+        date_field: 'Recency',
+        order_id_field: 'Frequency',
+        monetary_field: 'Monetary'
     }, inplace=True)
 
     # Create R, F, M scores from 1 to 5
