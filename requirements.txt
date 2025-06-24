@@ -17,11 +17,11 @@ jsonschema
 jsonschema-specifications
 kiwisolver
 MarkupSafe
-matplotlib~=3.9.4
+matplotlib
 narwhals
-numpy~=2.0.2
+numpy
 packaging
-pandas~=2.3.0
+pandas
 pillow
 protobuf
 pyarrow
@@ -32,10 +32,10 @@ pytz
 referencing
 requests
 rpds-py
-seaborn~=0.13.2
+seaborn
 six
 smmap
-streamlit~=1.46.0
+streamlit
 tenacity
 toml
 tornado
@@ -43,5 +43,5 @@ typing_extensions
 tzdata
 urllib3
 zipp
-
-faker~=37.4.0
+faker
+scikit-learn
