@@ -3,6 +3,7 @@ import numpy as np
 from faker import Faker
 import random
 import uuid
+import streamlit as st
 
 
 
@@ -12,6 +13,7 @@ fake = Faker()
 np.random.seed(42)
 random.seed(42)
 
+@st.cache_data
 def simulate_for_segmentation(num_users, num_products, num_transactions):
 
     # Generate users
