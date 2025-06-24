@@ -6,13 +6,26 @@ from shared.form import show_email_form
 st.set_page_config(page_title="Holitica")
 
 st.title("Welcome to Holitica")
-st.markdown("""
-We analyze behavior data to help businesses target more effectively.
 
+st.markdown("""
+#### What We Can Do
+
+We turn your raw data into clear, actionable insights that drive growth.
+Here’s how we can help your business:
+
+**Understand Your Customers** – segment your audience based on behavior, demographics, and value  
+**Target More Effectively** – design high-performing ad audiences using real data, not guesses  
+**Grow Sales with Insight** – match products, timing, and offers to the right people  
+**Spot Opportunities Early** – identify trends, churn risks, and untapped market segments  
+**Make Data Work for You** – from one-time reports to custom dashboards and automated predictions  
+""")
+
+
+st.markdown("""
 Explore real-world data use cases:
 
 - 📊 [Retail Customer Insights](./Retail_Customer_Insights)
-- 🧠 [Ad Persona Design](./Ad_Persona_Design)
+- 🧠 [Customer Persona Uncover](./Customer_Persona_Uncover)
 - 📉 [Churn Prediction](./Churn_Prediction)
 
 """)

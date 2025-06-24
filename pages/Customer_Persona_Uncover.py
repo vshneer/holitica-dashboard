@@ -34,7 +34,7 @@ num_transactions = 10000
 
 simulated_df = simulate_for_segmentation(num_users, num_products, num_transactions)
 
-st.title("Ad persona design")
+st.title("Customer Persona Uncover")
 st.write("#### Simulated data sample")
 st.caption("For presentation purposes data is 100% simulated.")
 # st.caption("Dataset is made of ~0.5M UK-based non-store online retail transactions. A few rows sample: ")
@@ -132,6 +132,25 @@ if category != "Select a category...":
     
     These rules help you create **precise audience segments** you can target in your Ads campaigns to attract more high-value customers.
     """)
+
+st.markdown("""
+---
+
+#### What Else We Can Do
+
+We help you turn your raw data into actionable targeting strategies for ads that convert.
+Here are just a few ways we can support your campaigns:
+
+ 
+🧭 **Lookalike Audience Modeling** – find non-buyers who behave like your VIPs  
+📦 **Product-Segment Matching** – identify which products resonate with which personas  
+📤 **Exportable Targeting Profiles** – generate ready-to-use audience definitions for Meta Ads campaigns
+🧬 **Audience Persona Discovery** – uncover who your top buyers really are based on behavior and demographics  
+📊 **Segment Scoring & Prioritization** – rank customer segments by revenue, conversion, or campaign potential 
+  
+"""
+
+)
 
 st.markdown(CALL)
 
