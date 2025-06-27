@@ -1,7 +1,8 @@
 import streamlit as st
 
-from shared.const import CALL, SLOGAN
-from shared.form import show_email_form
+from shared.form import show_sidebar_form
+
+show_sidebar_form()
 
 st.set_page_config(page_title="Holitica")
 
@@ -32,10 +33,3 @@ Explore real-world data use cases:
 
 """)
 
-st.markdown(CALL)
-
-submission = show_email_form()
-
-if submission:
-    # Optional: log it or send to email / CSV / database
-    st.write("Captured email:", submission["email"])

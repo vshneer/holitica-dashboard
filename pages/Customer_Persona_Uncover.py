@@ -1,7 +1,7 @@
 from sklearn.tree import DecisionTreeClassifier, export_text
 
-from shared.const import others_label, CALL
-from shared.form import show_email_form
+from shared.const import others_label
+from shared.form import show_email_form, show_sidebar_form
 from shared.rfm import build_rfm
 from shared.rules import explain_tree
 from shared.simulate import simulate_for_segmentation
@@ -17,6 +17,8 @@ num_products = 100
 num_transactions = 10000
 
 simulated_df = simulate_for_segmentation(num_users, num_products, num_transactions)
+
+show_sidebar_form()
 
 st.title("Customer Persona Uncover")
 st.write("#### Simulated data sample")
