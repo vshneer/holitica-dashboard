@@ -18,6 +18,8 @@ Here’s how we can help your business:
 **Grow Sales with Insight** – match products, timing, and offers to the right people  
 **Spot Opportunities Early** – identify trends, churn risks, and untapped market segments  
 **Make Data Work for You** – from one-time reports to custom dashboards and automated predictions  
+
+Our methods are powered by experience, common sense and machine learning. We connect Marketing, Technology and Data
 """)
 
 

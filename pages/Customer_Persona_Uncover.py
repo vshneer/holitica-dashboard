@@ -3,29 +3,13 @@ from sklearn.tree import DecisionTreeClassifier, export_text
 from shared.const import others_label, CALL
 from shared.form import show_email_form
 from shared.rfm import build_rfm
+from shared.rules import explain_tree
 from shared.simulate import simulate_for_segmentation
 import streamlit as st
 import pandas as pd
 
 
-# Translate rules to human-readable
-def parse_rule_line(rule_line):
-    rule_depth = rule_line.count('|   ')
-    content = rule_line.strip().replace('|--- ', '').replace('|   ', '')
 
-    if 'class:' in content:
-        label = content.split(':')[-1].strip()
-        return rule_depth, f"THEN → {'VIP' if label == '1' else 'Not VIP'}"
-    else:
-        parts = content.split(' ')
-        feature = parts[0].replace('_', ' ')
-        op = parts[1]
-        value = parts[2] if parts[2] != "" else parts[3]
-        if op == '<=':
-            condition = f"{feature} is **No**" if value == "0.50" else f"{feature} ≤ {value}"
-        else:
-            condition = f"{feature} is **Yes**" if value == "0.50" else f"{feature} > {value}"
-        return rule_depth, f"IF {condition}"
 
 # Parameters
 num_users = 500
@@ -75,25 +59,8 @@ if category != "Select a category...":
     # Extract rules
     rules = export_text(clf, feature_names=list(X.columns))
 
-    parsed_lines = rules.split('\n')
-    translated = []
-    current_path = []
-
-    for line in parsed_lines:
-        if not line.strip():
-            continue
-        depth, sentence = parse_rule_line(line)
-        current_path = current_path[:depth]
-        current_path.append(sentence)
-        if sentence.startswith("THEN"):
-            translated.append(" → ".join(current_path))
-
-
-    leaf_ids = clf.apply(X)
-    # print(rfm_df.shape, leaf_ids.shape)
-
+    leaf_ids, translated = explain_tree(rules, clf, X, 'VIP')
     rfm_df['leaf_id'] = leaf_ids
-
 
     leaf_stats = rfm_df.reset_index().groupby('leaf_id').agg({
         'user_id': 'nunique',
