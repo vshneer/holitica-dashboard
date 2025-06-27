@@ -8,6 +8,9 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.pipeline import Pipeline
 from xgboost import XGBClassifier
 
+from shared.const import CALL
+from shared.form import show_email_form
+
 # -------------------------
 # Column descriptions
 # -------------------------
@@ -109,13 +112,17 @@ df['SeniorCitizen'] = df['SeniorCitizen'].astype(str)
 # -------------------------
 # Streamlit UI
 # -------------------------
-st.title("Churn Explanation with SHAP")
-
+st.title("📉 Understanding Customer Churn")
+st.markdown("""
+Welcome! This tool helps you explore **why customers leave** by analyzing their behaviors, services, and account features.  
+Instead of simply predicting churn, our goal is to **understand the key drivers behind it** — and help you make better business decisions.
+""")
 st.markdown("""
 ### 📦 Dataset Overview
 
-This dataset contains customer information from a telecom company, including demographics, services used, contract types, and billing details.  
+This dataset contains customer records from a telecom company, including demographics, subscribed services, and billing information.  
 """)
+
 
 st.subheader("📊 Dataset Preview")
 df_display = df.reset_index(drop=True)
@@ -127,7 +134,7 @@ The goal is to predict whether a customer is likely to churn (leave the service)
 st.markdown('''
 To train the model, make predictions and explain feature importance please chose what features to use.
 ''')
-st.subheader("🧠 Choose Features for Churn Prediction")
+st.subheader("🧠 Select Features to Explore Churn Drivers")
 
 # Multiselect with only descriptions
 selected_options = st.multiselect(
@@ -137,7 +144,7 @@ selected_options = st.multiselect(
 )
 
 # Only run if user selected at least 5 features
-if len(selected_options) > 4 and st.button("Run churn prediction"):
+if len(selected_options) > 4 and st.button("Explore Churn Risk Factors"):
     st.toast("🚀 Running churn prediction...")
 
     # Immediately show the help text
@@ -216,7 +223,15 @@ if len(selected_options) > 4 and st.button("Run churn prediction"):
     # Optional toast after spinner
     st.toast("✅ Model is ready. Scroll down to view insights!")
     # Display plot
-    st.subheader("📉 Global Feature Importance (Summary Plot)")
+    st.subheader("🔍 What Influences Churn the Most?")
     plt.figure(figsize=(10, 6))
     shap.summary_plot(shap_values.values, X_encoded_df, feature_names=feature_names, show=False)
     st.pyplot(plt.gcf())
+
+st.markdown(CALL)
+
+submission = show_email_form()
+
+if submission:
+    # Optional: log it or send to email / CSV / database
+    st.write("Captured email:", submission["email"])

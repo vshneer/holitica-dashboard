@@ -17,11 +17,11 @@ jsonschema
 jsonschema-specifications
 kiwisolver
 MarkupSafe
-matplotlib~=3.9.4
+matplotlib
 narwhals
-numpy~=2.0.2
+numpy
 packaging
-pandas~=2.3.0
+pandas
 pillow
 protobuf
 pyarrow
