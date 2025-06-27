@@ -1,5 +1,22 @@
 import streamlit as st
 
+# utils.py
+import streamlit as st
+
+CALL = """
+
+#### 💡 Try This on Your Own Data!
+
+"""
+
+def show_sidebar_form():
+    with st.sidebar:
+        st.markdown(CALL)
+
+        submission = show_email_form()
+
+        if submission:
+            st.write("📩 Captured email:", submission["email"])
 
 def show_email_form():
     with st.form("email_form"):

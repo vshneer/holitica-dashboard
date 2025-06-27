@@ -3,8 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
-from shared.const import CALL
-from shared.form import show_email_form
+from shared.form import show_sidebar_form
 from shared.rfm import build_rfm
 
 st.set_page_config(page_title="Retail Customer Insights", page_icon="📊")
@@ -27,7 +26,7 @@ df_merged = df.merge(rfm[['Segment']], on='CustomerID')
 vip_label = 'VIP'
 others_label = 'Others'
 
-
+show_sidebar_form()
 
 ### Raw Data Sample
 
@@ -200,11 +199,3 @@ Here are just a few ways we can take:
 
 If you’d like a custom analysis on your store data, contact victor.shneer@gmail.com or message Holitica on LinkedIn.
 """)
-
-st.markdown(CALL)
-
-submission = show_email_form()
-
-if submission:
-    # Optional: log it or send to email / CSV / database
-    st.write("Captured email:", submission["email"])

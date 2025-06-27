@@ -8,8 +8,7 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.pipeline import Pipeline
 from xgboost import XGBClassifier
 
-from shared.const import CALL
-from shared.form import show_email_form
+from shared.form import show_sidebar_form
 
 # -------------------------
 # Column descriptions
@@ -70,6 +69,8 @@ rename_map = {
     "StreamingMovies_Yes":"Streaming Movies",
     "DeviceProtection_Yes":"Device protection",
     "TechSupport_Yes":"Got tech support",
+    "TechSupport_No internet service": "Tech Support Internet service",
+    "DeviceProtection_No internet service":"Device Protection Internet service",
     "OnlineSecurity_Yes":"Use online security",
     "OnlineSecurity_No": "Customer lacks online security",
     "Contract_Month-to-month": "Monthly contract",
@@ -109,9 +110,12 @@ if "Unnamed: 0" in df.columns:
 # Treat 'SeniorCitizen' as categorical
 df['SeniorCitizen'] = df['SeniorCitizen'].astype(str)
 
+
+
 # -------------------------
 # Streamlit UI
 # -------------------------
+show_sidebar_form()
 st.title("📉 Understanding Customer Churn")
 st.markdown("""
 Welcome! This tool helps you explore **why customers leave** by analyzing their behaviors, services, and account features.  
@@ -227,11 +231,3 @@ if len(selected_options) > 4 and st.button("Explore Churn Risk Factors"):
     plt.figure(figsize=(10, 6))
     shap.summary_plot(shap_values.values, X_encoded_df, feature_names=feature_names, show=False)
     st.pyplot(plt.gcf())
-
-st.markdown(CALL)
-
-submission = show_email_form()
-
-if submission:
-    # Optional: log it or send to email / CSV / database
-    st.write("Captured email:", submission["email"])
