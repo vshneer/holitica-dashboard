@@ -28,7 +28,7 @@ Explore real-world data use cases:
 
 - 📊 [Retail Customer Insights](./Retail_Customer_Insights)
 - 🧠 [Customer Persona Uncover](./Customer_Persona_Uncover)
-- 📉 [Understanding Customer Churn](./Understanding_Customer_Churn.py)
+- 📉 [Understanding Customer Churn](./Understanding_Customer_Churn)
 
 """)
 
