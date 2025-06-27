@@ -1,14 +1,12 @@
 from sklearn.tree import DecisionTreeClassifier, export_text
 
 from shared.const import others_label
-from shared.form import show_email_form, show_sidebar_form
+from shared.form import show_sidebar_form
 from shared.rfm import build_rfm
 from shared.rules import explain_tree
 from shared.simulate import simulate_for_segmentation
 import streamlit as st
 import pandas as pd
-
-
 
 
 # Parameters
@@ -23,7 +21,6 @@ show_sidebar_form()
 st.title("Customer Persona Uncover")
 st.write("#### Simulated data sample")
 st.caption("For presentation purposes data is 100% simulated.")
-# st.caption("Dataset is made of ~0.5M UK-based non-store online retail transactions. A few rows sample: ")
 df_display = simulated_df.reset_index(drop=True)
 df_display.index = [''] * len(df_display)
 st.dataframe(df_display.head(3))
@@ -120,11 +117,3 @@ Here are just a few ways we can support your campaigns:
 """
 
 )
-
-st.markdown(CALL)
-
-submission = show_email_form()
-
-if submission:
-    # Optional: log it or send to email / CSV / database
-    st.write("Captured email:", submission["email"])
