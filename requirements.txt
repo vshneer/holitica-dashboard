@@ -17,11 +17,11 @@ jsonschema
 jsonschema-specifications
 kiwisolver
 MarkupSafe
-matplotlib
+matplotlib~=3.9.4
 narwhals
-numpy
+numpy~=2.0.2
 packaging
-pandas
+pandas~=2.3.0
 pillow
 protobuf
 pyarrow
@@ -45,3 +45,5 @@ urllib3
 zipp
 faker
 scikit-learn
+xgboost
+shap

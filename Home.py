@@ -10,7 +10,7 @@ st.title("Welcome to Holitica")
 st.markdown("""
 #### What We Can Do
 
-We turn your raw data into clear, actionable insights that drive growth.
+We turn your data into clear, actionable insights that drive growth.
 Here’s how we can help your business:
 
 **Understand Your Customers** – segment your audience based on behavior, demographics, and value  
@@ -18,6 +18,8 @@ Here’s how we can help your business:
 **Grow Sales with Insight** – match products, timing, and offers to the right people  
 **Spot Opportunities Early** – identify trends, churn risks, and untapped market segments  
 **Make Data Work for You** – from one-time reports to custom dashboards and automated predictions  
+
+Our methods are powered by experience, common sense and machine learning. We connect Marketing, Technology and Data
 """)
 
 
