@@ -47,3 +47,4 @@ faker
 scikit-learn
 xgboost
 shap
+scikit-surprise
