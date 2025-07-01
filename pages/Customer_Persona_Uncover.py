@@ -1,7 +1,7 @@
 from sklearn.tree import DecisionTreeClassifier, export_text
 
 from shared.const import others_label
-from shared.form import show_sidebar_form
+from shared.form import show_sidebar_form, dataset_form_in_columns
 from shared.rfm import build_rfm
 from shared.rules import explain_tree
 from shared.simulate import simulate_for_segmentation
@@ -14,90 +14,108 @@ num_users = 500
 num_products = 100
 num_transactions = 10000
 
-simulated_df = simulate_for_segmentation(num_users, num_products, num_transactions)
+left, right = st.columns([3, 1])  # Wider left, narrower right
+
+# Load and cache data
+@st.cache_data
+def load_data():
+    # TODO simulate once
+    return simulate_for_segmentation(num_users, num_products, num_transactions)
+
+simulated_df = load_data()
 
 show_sidebar_form()
 
-st.title("Customer Persona Uncover")
-st.write("#### Simulated data sample")
-st.caption("For presentation purposes data is 100% simulated.")
-df_display = simulated_df.reset_index(drop=True)
-df_display.index = [''] * len(df_display)
-st.dataframe(df_display.head(3))
+# Use in page logic
+df = dataset_form_in_columns(
+    right,
+    default_df=simulated_df,
+    required_columns=['timestamp', 'order_id', 'user_id'],
+    help_text="File must include columns: timestamp, order_id, user_id"
+)
 
-category_options = ["Select a category..."] + list(simulated_df['category'].unique())
-st.write("#### From raw transactional data to Customer Personas")
-st.write("Let's see what we can find!")
-category = st.selectbox("Select category", category_options)
+with left:
+    st.title("Customer Persona Uncover")
+    if df is not None:
+        st.write("#### Simulated data sample")
+        st.caption("For presentation purposes data is 100% simulated.")
+        df_display = simulated_df.reset_index(drop=True)
+        df_display.index = [''] * len(df_display)
+        st.dataframe(df_display.head(3))
 
-if category != "Select a category...":
-    with st.spinner("Analyzing..."):
-        rfm_df = build_rfm(simulated_df[simulated_df['category'] == category], 'timestamp', 'order_id', 'user_id', 'total_price')
+        category_options = ["Select a category..."] + list(simulated_df['category'].unique())
+        st.write("#### From raw transactional data to Customer Personas")
+        st.write("Let's see what we can find!")
+        category = st.selectbox("Select category", category_options)
 
-    rfm_df["is_vip"] = (rfm_df['Segment'] != others_label).astype(int)
-    is_vip_df = rfm_df[["is_vip"]]
+        if category != "Select a category...":
+            with st.spinner("Analyzing..."):
+                rfm_df = build_rfm(simulated_df[simulated_df['category'] == category], 'timestamp', 'order_id', 'user_id', 'total_price')
 
-    # Merge demographics and behavioral (excluding purchase outcomes)
-    user_traits = simulated_df.groupby('user_id').agg({
-        'category': lambda x: x.value_counts().idxmax(),
-        'age': 'first',
-        'gender': 'first',
-        'country': 'first',
-        'traffic_source': 'first',
-        'device': 'first',
-    }).rename(columns={'category': 'top_category'}).reset_index()
-    df_fashion = is_vip_df.merge(user_traits, on='user_id')
+            rfm_df["is_vip"] = (rfm_df['Segment'] != others_label).astype(int)
+            is_vip_df = rfm_df[["is_vip"]]
 
-    # Prepare features for tree
-    X = pd.get_dummies(df_fashion[['age', 'gender', 'country', 'traffic_source', 'device']], drop_first=True)
-    y = df_fashion['is_vip']
-    # Train decision tree
-    clf = DecisionTreeClassifier(max_depth=3, random_state=42)
-    clf.fit(X, y)
+            # Merge demographics and behavioral (excluding purchase outcomes)
+            user_traits = simulated_df.groupby('user_id').agg({
+                'category': lambda x: x.value_counts().idxmax(),
+                'age': 'first',
+                'gender': 'first',
+                'country': 'first',
+                'traffic_source': 'first',
+                'device': 'first',
+            }).rename(columns={'category': 'top_category'}).reset_index()
+            df_fashion = is_vip_df.merge(user_traits, on='user_id')
 
-    # Extract rules
-    rules = export_text(clf, feature_names=list(X.columns))
+            # Prepare features for tree
+            X = pd.get_dummies(df_fashion[['age', 'gender', 'country', 'traffic_source', 'device']], drop_first=True)
+            y = df_fashion['is_vip']
+            # Train decision tree
+            clf = DecisionTreeClassifier(max_depth=3, random_state=42)
+            clf.fit(X, y)
 
-    leaf_ids, translated = explain_tree(rules, clf, X, 'VIP')
-    rfm_df['leaf_id'] = leaf_ids
+            # Extract rules
+            rules = export_text(clf, feature_names=list(X.columns))
 
-    leaf_stats = rfm_df.reset_index().groupby('leaf_id').agg({
-        'user_id': 'nunique',
-        'Monetary': 'sum',
-        'is_vip': 'sum'
-    }).rename(columns={
-        'user_id': 'Number of Users',
-        'Monetary': 'Revenue',
-        'is_vip': 'Number of VIP Users'
-    }).reset_index()
+            leaf_ids, translated = explain_tree(rules, clf, X, 'VIP')
+            rfm_df['leaf_id'] = leaf_ids
 
-    readable_rules_df = pd.DataFrame({'Readable Rule': translated})
+            leaf_stats = rfm_df.reset_index().groupby('leaf_id').agg({
+                'user_id': 'nunique',
+                'Monetary': 'sum',
+                'is_vip': 'sum'
+            }).rename(columns={
+                'user_id': 'Number of Users',
+                'Monetary': 'Revenue',
+                'is_vip': 'Number of VIP Users'
+            }).reset_index()
 
-    readable_rules_df['leaf_id'] = leaf_stats['leaf_id'].values
+            readable_rules_df = pd.DataFrame({'Readable Rule': translated})
 
-    readable_rules_df = readable_rules_df.merge(leaf_stats, on='leaf_id')
+            readable_rules_df['leaf_id'] = leaf_stats['leaf_id'].values
 
-    readable_rules_df['Revenue'] = readable_rules_df['Revenue'].apply(lambda x: f"{x/1000:.0f}k")
+            readable_rules_df = readable_rules_df.merge(leaf_stats, on='leaf_id')
 
-    df_display = readable_rules_df.reset_index(drop=True)
-    df_display.index = [''] * len(df_display)
+            readable_rules_df['Revenue'] = readable_rules_df['Revenue'].apply(lambda x: f"{x/1000:.0f}k")
 
-    st.write()
+            df_display = readable_rules_df.reset_index(drop=True)
+            df_display.index = [''] * len(df_display)
 
-    st.write("Below, you can see the generated rules. Each rule defines an audience segment for the selected category. For each rule, we show the cumulative revenue generated by that audience.")
-    st.dataframe(df_display[['Readable Rule', 'Revenue', 'Number of Users', 'Number of VIP Users']], use_container_width=True)
-    st.markdown("""
-    #### How This Works
-    
-    Algorithm analyzes your customers to understand what makes your top buyers unique.
-    
-    First, we identify your **VIP customers**—those who spend the most in this category. Then, we examine their **demographics and behavior** to discover common patterns.
-    
-    Our system uses a decision tree to uncover simple, explainable rules like:
-    > "VIPs are often women aged 25–35 who shop from mobile devices and come from Instagram."
-    
-    These rules help you create **precise audience segments** you can target in your Ads campaigns to attract more high-value customers.
-    """)
+            st.write()
+
+            st.write("Below, you can see the generated rules. Each rule defines an audience segment for the selected category. For each rule, we show the cumulative revenue generated by that audience.")
+            st.dataframe(df_display[['Readable Rule', 'Revenue', 'Number of Users', 'Number of VIP Users']], use_container_width=True)
+            st.markdown("""
+            #### How This Works
+            
+            Algorithm analyzes your customers to understand what makes your top buyers unique.
+            
+            First, we identify your **VIP customers**—those who spend the most in this category. Then, we examine their **demographics and behavior** to discover common patterns.
+            
+            Our system uses a decision tree to uncover simple, explainable rules like:
+            > "VIPs are often women aged 25–35 who shop from mobile devices and come from Instagram."
+            
+            These rules help you create **precise audience segments** you can target in your Ads campaigns to attract more high-value customers.
+            """)
 
 st.markdown("""
 ---
