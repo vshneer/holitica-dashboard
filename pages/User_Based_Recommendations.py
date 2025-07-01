@@ -32,33 +32,34 @@ with left:
         df_display = df.reset_index(drop=True)
         df_display.index = [''] * len(df_display)
         st.dataframe(df_display.head(3))
-        # Prepare Surprise dataset
-        reader = Reader(rating_scale=(df['Rating'].min(), df['Rating'].max()))
-        data = Dataset.load_from_df(df[['User ID', 'Product ID', 'Rating']], reader)
-        train_set = data.build_full_trainset()
+if df is not None:
+    # Prepare Surprise dataset
+    reader = Reader(rating_scale=(df['Rating'].min(), df['Rating'].max()))
+    data = Dataset.load_from_df(df[['User ID', 'Product ID', 'Rating']], reader)
+    train_set = data.build_full_trainset()
 
-        # Train model
-        sim_options = {'name': 'cosine', 'user_based': False}
-        algo = SVD()
-        algo.fit(train_set)
+    # Train model
+    sim_options = {'name': 'cosine', 'user_based': False}
+    algo = SVD()
+    algo.fit(train_set)
 
 
-        st.markdown("Get personalized product suggestions based on real user ratings.")
+    st.markdown("Get personalized product suggestions based on real user ratings.")
 
-        user_ids = df['User ID'].unique()
-        selected_user = st.selectbox("Select a User ID", user_ids)
+    user_ids = df['User ID'].unique()
+    selected_user = st.selectbox("Select a User ID", user_ids)
 
-        # Only compute recommendations if a user is selected
-        if selected_user:
-            all_items = df['Product ID'].unique()
-            user_items = df[df['User ID'] == selected_user]['Product ID'].tolist()
-            items_to_predict = [item for item in all_items if item not in user_items]
-            predictions = [algo.predict(uid=selected_user, iid=item) for item in items_to_predict]
-            top_n = [
-                pred for pred in predictions
-                if not pred.details['was_impossible']
-            ]
-            top_n = sorted(top_n, key=lambda x: x.est, reverse=True)[:5]
-            st.subheader(f"Top 5 Recommendations for User {selected_user}")
-            for pred in top_n:
-                st.markdown(f"- **Product ID:** `{pred.iid}` — _Estimated Rating_: **{pred.est:.2f}**")
+    # Only compute recommendations if a user is selected
+    if selected_user:
+        all_items = df['Product ID'].unique()
+        user_items = df[df['User ID'] == selected_user]['Product ID'].tolist()
+        items_to_predict = [item for item in all_items if item not in user_items]
+        predictions = [algo.predict(uid=selected_user, iid=item) for item in items_to_predict]
+        top_n = [
+            pred for pred in predictions
+            if not pred.details['was_impossible']
+        ]
+        top_n = sorted(top_n, key=lambda x: x.est, reverse=True)[:5]
+        st.subheader(f"Top 5 Recommendations for User {selected_user}")
+        for pred in top_n:
+            st.markdown(f"- **Product ID:** `{pred.iid}` — _Estimated Rating_: **{pred.est:.2f}**")
