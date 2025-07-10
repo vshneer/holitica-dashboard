@@ -37,7 +37,7 @@ referencing==0.36.2
 requests==2.32.4
 rpds-py==0.25.1
 scikit-learn==1.7.0
-git+https://github.com/NicolasHug/Surprise.git@master#egg=scikit-surprise
+scikit-surprise @ git+https://github.com/NicolasHug/Surprise.git@2381fb11d0c4bf917cc4b9126f205d0013649966
 scipy==1.15.3
 seaborn==0.13.2
 shap==0.48.0
