@@ -1,11 +1,33 @@
 import streamlit as st
 import pandas as pd
+import smtplib
+from email.message import EmailMessage
+import os
 
 CALL = """
 
-#### 💡 Try This on Your Own Data!
+#### 💡 Try it on Your Own Data!
 
 """
+
+EMAIL_SENDER = os.getenv("EMAIL_SENDER")       # e.g., you@yourdomain.com
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")   # App password or regular password
+EMAIL_RECEIVER = os.getenv("EMAIL_RECEIVER")   # Could be same as sender
+
+def send_email(subject, body):
+    msg = EmailMessage()
+    msg.set_content(body)
+    msg["Subject"] = subject
+    msg["From"] = EMAIL_SENDER
+    msg["To"] = EMAIL_RECEIVER
+
+    try:
+        with smtplib.SMTP("smtp.office365.com", 587) as smtp:
+            smtp.starttls()
+            smtp.login(EMAIL_SENDER, EMAIL_PASSWORD)
+            smtp.send_message(msg)
+    except Exception as e:
+        st.error(f"Email failed to send: {e}")
 
 def dataset_form_in_columns(
     right,
