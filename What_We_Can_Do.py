@@ -1,6 +1,8 @@
 import streamlit as st
 
 from shared.form import show_sidebar_form
+from dotenv import load_dotenv
+import os
 
 show_sidebar_form()
 
@@ -19,22 +21,15 @@ st.markdown("""
 #### What We Can Do
 
 Have a question? We help you find the answer in your data.
-We turn data into clear insights that drive growth.
 Our approach combines experience, common sense, and machine learning.
 We bridge the gap between ***Marketing, Technology, and Data***.
 """)
 
 
 st.markdown("""
-#### How we do it
+#### Explore
 
-We carefully prepare the data through cleaning and preprocessing.
-When needed, we also build custom data pipelines and ETL jobs to ensure reliable and scalable data engineering.
-We explore the data and formulate hypotheses.
-Then we dive deep using statistical methods to validate or reject those hypotheses.
-Iteration after iteration, we extract insights that are not only statistically valid but also practically significant.
-
-Explore real-world data use cases — or try them out with ***your own data***:
+use cases — or try them out with ***your own data***:
 
 - 📊 [Retail Customer Insights](./Retail_Customer_Insights)
 - 🧠 [Customer Persona Discovery](./Customer_Persona_Discovery)
