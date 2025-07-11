@@ -3,6 +3,13 @@ import pandas as pd
 import smtplib
 from email.message import EmailMessage
 import os
+import smtplib
+from email.message import EmailMessage
+import env
+import time
+import re
+import streamlit.components.v1 as components
+import requests
 
 CALL = """
 
@@ -13,6 +20,20 @@ CALL = """
 EMAIL_SENDER = os.getenv("EMAIL_SENDER")       # e.g., you@yourdomain.com
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")   # App password or regular password
 EMAIL_RECEIVER = os.getenv("EMAIL_RECEIVER")   # Could be same as sender
+RECAPTCHA_SITE_KEY = os.getenv("RECAPTCHA_SITE_KEY")
+RECAPTCHA_SECRET_KEY = os.getenv("RECAPTCHA_SECRET_KEY")
+
+def verify_recaptcha(response_token):
+    secret = RECAPTCHA_SECRET_KEY
+    payload = {
+        'secret': secret,
+        'response': response_token
+    }
+    r = requests.post("https://www.google.com/recaptcha/api/siteverify", data=payload)
+    return r.json().get("success", False)
+
+def is_valid_email(email):
+    return re.match(r"[^@]+@[^@]+\.[^@]+", email)
 
 def send_email(subject, body):
     msg = EmailMessage()
@@ -22,9 +43,9 @@ def send_email(subject, body):
     msg["To"] = EMAIL_RECEIVER
 
     try:
-        with smtplib.SMTP("smtp.office365.com", 587) as smtp:
+        with smtplib.SMTP("smtp-relay.brevo.com", 587) as smtp:
             smtp.starttls()
-            smtp.login(EMAIL_SENDER, EMAIL_PASSWORD)
+            smtp.login("91cb9c001@smtp-brevo.com", EMAIL_PASSWORD)
             smtp.send_message(msg)
     except Exception as e:
         st.error(f"Email failed to send: {e}")
@@ -106,21 +127,28 @@ def validate_uploaded_file(uploaded_file, required_columns=None, max_size_mb=5):
 def show_sidebar_form():
     with st.sidebar:
         st.markdown(CALL)
-
-        submission = show_email_form()
-
-        if submission:
-            st.write("📩 Captured email:", submission["email"])
+        show_email_form()
 
 def show_email_form():
+    response_token = st.query_params.get("g-recaptcha-response", [None])[0]
     with st.form("email_form"):
         st.markdown("**Leave your email and a short message:**")
         email = st.text_input("Email")
         message = st.text_area("Tell me briefly about your use case")
+        # Inject HTML for reCAPTCHA
+        captcha_html = f"""
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+        <div class="g-recaptcha" data-sitekey="{RECAPTCHA_SITE_KEY}"></div>
+        """
+        components.html(captcha_html, height=90)
         submitted = st.form_submit_button("Send")
 
         if submitted:
-            st.success("Thanks! I’ll get back to you soon.")
-            return {"email": email, "message": message}
-
-    return None
+            if not is_valid_email(email):
+                st.warning("Please enter a valid email.")
+            elif not verify_recaptcha(response_token):
+                st.error("reCAPTCHA verification failed.")
+            else:
+                st.success("Thanks! I’ll get back to you soon.")
+                send_email(email, message)
+                st.experimental_rerun()
