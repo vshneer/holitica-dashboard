@@ -2,7 +2,7 @@ import pandas as pd
 import datetime as dt
 
 def segment_customer(row):
-    if row['R_Score'] >= 5 and row['F_Score'] >= 5:
+    if row['R_Score'] >= 5 and row['F_Score'] >= 4:
         return 'VIP'
     elif row['R_Score'] >= 4 and row['F_Score'] >= 4:
         return 'Loyal'

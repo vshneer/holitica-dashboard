@@ -2,11 +2,12 @@ import pandas as pd
 from surprise import Dataset, Reader, SVD
 import streamlit as st
 
-from shared.form import show_sidebar_form, dataset_form_in_columns
+from shared.form import dataset_form_in_columns
+from shared.const import show_side_bar_with_more
 
+show_side_bar_with_more()
 left, right = st.columns([3, 1])  # Wider left, narrower right
 
-show_sidebar_form()
 
 # Load and cache data
 @st.cache_data
