@@ -8,15 +8,16 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.pipeline import Pipeline
 from xgboost import XGBClassifier
 
-from shared.form import show_sidebar_form, dataset_form_in_columns
+from shared.form import dataset_form_in_columns
+from shared.const import show_side_bar_with_more
 
+show_side_bar_with_more()
 # -------------------------
 # Column descriptions
 # -------------------------
 st.set_page_config(page_title="Understanding Customer Churn")
 
 left, right = st.columns([3, 1])  # Wider left, narrower right
-show_sidebar_form()
 
 insight_map = {
     "tenure": "Tenure is a strong predictor of churn. The longer a customer has been on board, the lower their churn risk. This suggests that retention improves significantly once customers have used the product for some time. However, many new users leave early.",

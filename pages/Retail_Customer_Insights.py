@@ -3,33 +3,30 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
-from shared.form import show_sidebar_form, dataset_form_in_columns
+from shared.form import dataset_form_in_columns
 from shared.rfm import build_rfm
-
+from shared.const import show_side_bar_with_more
+show_side_bar_with_more()
 st.set_page_config(page_title="Retail Customer Insights", page_icon="📊")
 left, right = st.columns([3, 1])  # Wider left, narrower right
 
-# Load and cache data
 @st.cache_data
 def load_data():
-    return pd.read_csv('data/uk-online-retail-clean.csv', index_col=0)
+    return pd.read_csv('data/simulated_transactions.csv')
 
 
 default_df = load_data()
-show_sidebar_form()
 df = dataset_form_in_columns(
     right,
     default_df=default_df,
-    required_columns=['Quantity', 'UnitPrice', 'CustomerID', 'InvoiceDate'],
+    required_columns=['InvoiceNo', 'Quantity', 'UnitPrice', 'CustomerID', 'InvoiceDate', 'Description'],
     help_text="File must include columns: Quantity, UnitPrice, CustomerID, InvoiceDate"
 )
 
 with left:
+
     if df is not None:
         ### Calculate RFM and merge
-
-        # Use a day after the last invoice as the reference point
-
         df['Revenue'] = df['Quantity'] * df['UnitPrice']
         df['CustomerID'] = df['CustomerID'].astype(int)
         # Make sure InvoiceDate is in datetime format
@@ -43,19 +40,24 @@ with left:
         vip_label = 'VIP'
         others_label = 'Others'
 
-        ### Raw Data Sample
-
         st.title("Retail Customer Insights")
-        st.write("#### Raw Data sample")
-        st.caption("Dataset is made of ~0.5M UK-based non-store online retail transactions. A few rows sample: ")
-        st.table(df_merged[["InvoiceNo", "Description", "Revenue", "Segment"]].head(3))
-        st.caption("There are more columns, like customer and product ids.")
-        st.caption("For presentation purposes data cleaning, preparation and RFM calculations are already performed.")
+        st.write("#### What we have in the data?")
+        st.markdown('''
+        Data features:
+        - "InvoiceNo"   - order unique identifier or the invoice number 
+        - "Description" - few words describing the product 
+        - "Revenue"     - from the order  
+        - "Segment"     - VIP customer, Loyal or Other
+        - and more.. 
+        
+        Sample:
+        ''')
+        st.caption("For demonstration purposes data is simulated")
+        df_display = df.reset_index(drop=True)
+        df_display.index = [''] * len(df_display)
+        st.dataframe(df_display.head(3))
 
 if df is not None:
-
-    ### Customer vs Revenue share
-
     # Calculation
     # Raw counts
     vip_count = rfm[rfm['Segment'] == 'VIP'].shape[0]
@@ -93,10 +95,11 @@ if df is not None:
                 wedgeprops={'width': 0.4})
     axes[1].set_title('Revenue Share')
 
+
     st.write("### Let's dive in")
     st.write("#### A Small Group, A Big Impact")
-    st.caption("10% of customers bring 37% of revenue")
-
+    st.caption("Let's see what fraction of revenue VIP customers hold")
+    st.write()
     # Display in Streamlit
     st.pyplot(fig)
 
@@ -183,9 +186,8 @@ if df is not None:
     st.caption("Based on segment preferences we can build a recommendation system")
 
     segment = st.selectbox("Select a customer segment", df_merged['Segment'].unique())
-    country = st.selectbox("Select a country", df_merged['Country'].unique())
 
-    group_df = df_merged[(df_merged['Segment'] == segment) & (df_merged['Country'] == country)]
+    group_df = df_merged[(df_merged['Segment'] == segment)]
     top_products = (
         group_df.groupby('Description')['Quantity']
         .sum()

@@ -1,11 +1,10 @@
 import streamlit as st
 
-from shared.form import show_sidebar_form
 from dotenv import load_dotenv
 import os
+from shared.const import show_side_bar_with_more
 
-show_sidebar_form()
-
+show_side_bar_with_more()
 st.set_page_config(page_title="Holitica")
 
 st.title("Welcome to Holitica")
@@ -39,6 +38,6 @@ use cases — or try them out with ***your own data***:
 """)
 
 st.markdown("""
-Curious to see it in action? Use the email form in the left sidebar to request a ***free demo***.
+Curious to see it in action? Request a demo [here](https://request.holitica.it/).
 
 """)
