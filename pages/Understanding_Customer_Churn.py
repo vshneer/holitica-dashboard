@@ -123,7 +123,7 @@ df['SeniorCitizen'] = df['SeniorCitizen'].astype(str)
 
 st.title("📉 Understanding Customer Churn")
 st.markdown("""
-This tool helps you explore **why customers leave** by analyzing their behaviors, services, and account features.  
+This tool helps you explore **how customers leave** by analyzing their behaviors and account features.  
 Our goal is to **understand the key drivers behind churn**.
 """)
 
