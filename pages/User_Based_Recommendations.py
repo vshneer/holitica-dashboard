@@ -28,7 +28,20 @@ df = dataset_form_in_columns(
 with left:
     st.title("🛍️ Fashion Product Recommender")
     if df is not None:
-        # Streamlit UI
+        st.write("#### What model is trying to tell?")
+        st.markdown("""
+        "People like you also liked this"
+        or
+        "You may like this product, because it's similar to others you've interacted with"
+        """)
+        st.write("""
+        #### What actually happening?
+
+        - We analyze patterns in customer ratings or interactions
+        - We group together users with similar tastes, even if they’ve never bought the same product
+        - We identify hidden connections between products — products that tend to be liked by the same type of people
+
+            """)
         st.subheader("📊 Dataset Preview")
         df_display = df.reset_index(drop=True)
         df_display.index = [''] * len(df_display)
@@ -64,3 +77,17 @@ if df is not None:
         st.subheader(f"Top 5 Recommendations for User {selected_user}")
         for pred in top_n:
             st.markdown(f"- **Product ID:** `{pred.iid}` — _Estimated Rating_: **{pred.est:.2f}**")
+
+st.markdown("---")
+st.write("### What Else We Can Do")
+
+st.markdown("""
+
+- 🎁 **Personalized Product Recommendations** – suggest the right products for each user based on behavior  
+- 🛒 **Next Best Offer Modeling** – predict what a customer is most likely to buy next  
+- 🧮 **Collaborative Filtering & Content-Based Models** – depending on your data structure and product range  
+- 💼 **B2B Bundle Suggestions** – recommend product kits or services based on client type or purchase patterns  
+- 📊 **Recommendation System Dashboards** – monitor performance, CTRs, and customer lift over time  
+
+If you’d like a custom recommendation engine built for your business, register [here](https://request.holitica.it/) or contact victor@holitica.it. You can also find Holitica on [LinkedIn](https://www.linkedin.com/company/holitica/).
+""")

@@ -11,7 +11,6 @@ from xgboost import XGBClassifier
 from shared.form import dataset_form_in_columns
 from shared.const import show_side_bar_with_more
 
-show_side_bar_with_more()
 # -------------------------
 # Column descriptions
 # -------------------------
@@ -100,6 +99,7 @@ rename_map = {
     "PaymentMethod_Mailed check":"Mailed check",
     "PaymentMethod_Bank transfer (automatic)":"Automatic bank transfer",
 }
+show_side_bar_with_more()
 
 # Load and cache data
 @st.cache_data
@@ -109,140 +109,144 @@ def load_data():
 # -------------------------
 # Load and preprocess data
 # -------------------------
-df_default = load_data()
-
+df = load_data()
 # Drop index column if present
-if "Unnamed: 0" in df_default.columns:
-    df_default = df_default.drop(columns=["Unnamed: 0"])
+if "Unnamed: 0" in df.columns:
+    df = df.drop(columns=["Unnamed: 0"])
 
 # Treat 'SeniorCitizen' as categorical
-df_default['SeniorCitizen'] = df_default['SeniorCitizen'].astype(str)
-
-# Use in page logic
-df = dataset_form_in_columns(
-    right,
-    default_df=df_default,
-    required_columns=["Churn"],
-    help_text="File must include columns: Churn"
-)
+df['SeniorCitizen'] = df['SeniorCitizen'].astype(str)
 
 # -------------------------
 # Streamlit UI
 # -------------------------
-with left:
-    st.title("📉 Understanding Customer Churn")
+
+st.title("📉 Understanding Customer Churn")
+st.markdown("""
+This tool helps you explore **why customers leave** by analyzing their behaviors, services, and account features.  
+Our goal is to **understand the key drivers behind churn**.
+""")
+
+st.markdown("""
+### 📦 Dataset Overview
+
+This dataset contains customer records from a telecom company, including demographics, subscribed services, and billing information.  
+""")
+
+st.subheader("📊 Dataset Preview")
+df_display = df.reset_index(drop=True)
+df_display.index = [''] * len(df_display)
+st.dataframe(df_display.head(3))
+st.markdown('''
+The goal is to predict whether a customer is likely to churn (leave the service) and how can we prevent it.
+''')
+st.markdown('''
+To train the model, make predictions and explain feature importance please chose what features to use.
+''')
+st.subheader("🧠 Select Features to Explore Churn Drivers")
+
+# Multiselect with only descriptions
+selected_options = st.multiselect(
+    "Select the features you'd like to include. Five at least.",
+    options=list(description_to_column.keys()),
+    default=None
+)
+
+# Only run if user selected at least 5 features
+if len(selected_options) > 4 and st.button("Explore Churn Risk Factors"):
+    st.toast("🚀 Running churn prediction...")
+
+    # Immediately show the help text
     st.markdown("""
-    Welcome! This tool helps you explore **why customers leave** by analyzing their behaviors, services, and account features.  
-    Instead of simply predicting churn, our goal is to **understand the key drivers behind it** — and help you make better business decisions.
+    ### ℹ️ How to Read the SHAP Summary Plot
+
+    - **Each dot** = one customer  
+    - **Each row** = one feature used in the model  
+    - **X-axis (left ↔ right)** = how much the feature influenced the model's churn prediction
+        - **Wide spread** = this feature has a **strong impact** (important)
+        - **Tight cluster near 0** = this feature has **little impact** (unimportant)
+        - **Right** = increases predicted churn  
+        - **Left** = decreases predicted churn  
+    - **Color** shows the actual value of the feature:
+        - 🔴 Red = high value  
+        - 🔵 Blue = low value  
+
+    ---
+    **Example**: If blue dots (short tenure) appear on the right for "tenure", it means short-tenure customers are more likely to churn.
     """)
-    if df is not None:
-        st.markdown("""
-        ### 📦 Dataset Overview
 
-        This dataset contains customer records from a telecom company, including demographics, subscribed services, and billing information.  
-        """)
+    selected_columns = [description_to_column[desc] for desc in selected_options]
 
-        st.subheader("📊 Dataset Preview")
-        df_display = df.reset_index(drop=True)
-        df_display.index = [''] * len(df_display)
-        st.dataframe(df_display.head(3))
-        st.markdown('''
-        The goal is to predict whether a customer is likely to churn (leave the service) and how can we prevent it.
-        ''')
-        st.markdown('''
-        To train the model, make predictions and explain feature importance please chose what features to use.
-        ''')
-        st.subheader("🧠 Select Features to Explore Churn Drivers")
+    # Show insights for selected features (if any are in the map)
+    st.markdown("### 🔍 Feature Insights")
 
-if df is not None:
-    # Multiselect with only descriptions
-    selected_options = st.multiselect(
-        "Select the features you'd like to include. Five at least.",
-        options=list(description_to_column.keys()),
-        default=None
-    )
+    for col in selected_columns:
+        if col in insight_map:
+            st.markdown(f"- **{column_descriptions[col]}**: {insight_map[col]}")
 
-    # Only run if user selected at least 5 features
-    if len(selected_options) > 4 and st.button("Explore Churn Risk Factors"):
-        st.toast("🚀 Running churn prediction...")
+    with st.spinner("⏳ Training model and explaining predictions..."):
+        import time
 
-        # Immediately show the help text
-        st.markdown("""
-        ### ℹ️ How to Read the SHAP Summary Plot
-    
-        - **Each dot** = one customer  
-        - **Each row** = one feature used in the model  
-        - **X-axis (left ↔ right)** = how much the feature influenced the model's churn prediction
-            - **Wide spread** = this feature has a **strong impact** (important)
-            - **Tight cluster near 0** = this feature has **little impact** (unimportant)
-            - **Right** = increases predicted churn  
-            - **Left** = decreases predicted churn  
-        - **Color** shows the actual value of the feature:
-            - 🔴 Red = high value  
-            - 🔵 Blue = low value  
-    
-        ---
-        **Example**: If blue dots (short tenure) appear on the right for "tenure", it means short-tenure customers are more likely to churn.
-        """)
+        time.sleep(0.5)  # Give spinner time to show before heavy lifting
+        # Feature matrix and target
+        X = df[selected_columns]
+        y = df["Churn"]
 
-        selected_columns = [description_to_column[desc] for desc in selected_options]
+        # Identify column types
+        cat_cols = X.select_dtypes(include=["object", "category"]).columns.tolist()
+        num_cols = X.select_dtypes(exclude=["object", "category"]).columns.tolist()
 
-        # Show insights for selected features (if any are in the map)
-        st.markdown("### 🔍 Feature Insights")
+        # Split data
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.2, random_state=42, stratify=y
+        )
 
-        for col in selected_columns:
-            if col in insight_map:
-                st.markdown(f"- **{column_descriptions[col]}**: {insight_map[col]}")
+        # Preprocessor and pipeline
+        preprocessor = ColumnTransformer(
+            transformers=[
+                ("cat", OneHotEncoder(handle_unknown="ignore", drop=None), cat_cols)
+            ],
+            remainder="passthrough"
+        )
+        clf = Pipeline(steps=[
+            ("preprocessor", preprocessor),
+            ("classifier", XGBClassifier(use_label_encoder=False, eval_metric="logloss", random_state=42))
+        ])
+        clf.fit(X_train, y_train)
 
-        with st.spinner("⏳ Training model and explaining predictions..."):
-            import time
-
-            time.sleep(0.5)  # Give spinner time to show before heavy lifting
-            # Feature matrix and target
-            X = df[selected_columns]
-            y = df["Churn"]
-
-            # Identify column types
-            cat_cols = X.select_dtypes(include=["object", "category"]).columns.tolist()
-            num_cols = X.select_dtypes(exclude=["object", "category"]).columns.tolist()
-
-            # Split data
-            X_train, X_test, y_train, y_test = train_test_split(
-                X, y, test_size=0.2, random_state=42, stratify=y
-            )
-
-            # Preprocessor and pipeline
-            preprocessor = ColumnTransformer(
-                transformers=[
-                    ("cat", OneHotEncoder(handle_unknown="ignore", drop=None), cat_cols)
-                ],
-                remainder="passthrough"
-            )
-            clf = Pipeline(steps=[
-                ("preprocessor", preprocessor),
-                ("classifier", XGBClassifier(use_label_encoder=False, eval_metric="logloss", random_state=42))
-            ])
-            clf.fit(X_train, y_train)
-
-            # Get encoded feature names
-            ohe = preprocessor.named_transformers_['cat']
-            encoded_cat_cols = ohe.get_feature_names_out(cat_cols)
-            feature_names = list(encoded_cat_cols) + num_cols
-            feature_names = [rename_map.get(name, name) for name in feature_names]
+        # Get encoded feature names
+        ohe = preprocessor.named_transformers_['cat']
+        encoded_cat_cols = ohe.get_feature_names_out(cat_cols)
+        feature_names = list(encoded_cat_cols) + num_cols
+        feature_names = [rename_map.get(name, name) for name in feature_names]
 
 
-            # Create DataFrame with named columns
-            X_encoded = preprocessor.transform(X_train)
-            X_encoded_df = pd.DataFrame(X_encoded, columns=feature_names)
+        # Create DataFrame with named columns
+        X_encoded = preprocessor.transform(X_train)
+        X_encoded_df = pd.DataFrame(X_encoded, columns=feature_names)
 
-            # SHAP explainer
-            explainer = shap.Explainer(clf.named_steps["classifier"], X_encoded_df)
-            shap_values = explainer(X_encoded_df)
+        # SHAP explainer
+        explainer = shap.Explainer(clf.named_steps["classifier"], X_encoded_df)
+        shap_values = explainer(X_encoded_df)
 
-        # Optional toast after spinner
-        st.toast("✅ Model is ready. Scroll down to view insights!")
-        # Display plot
-        st.subheader("🔍 What Influences Churn the Most?")
-        plt.figure(figsize=(10, 6))
-        shap.summary_plot(shap_values.values, X_encoded_df, feature_names=feature_names, show=False)
-        st.pyplot(plt.gcf())
+    # Optional toast after spinner
+    st.toast("✅ Model is ready. Scroll down to view insights!")
+    # Display plot
+    st.subheader("🔍 What Influences Churn the Most?")
+    plt.figure(figsize=(10, 6))
+    shap.summary_plot(shap_values.values, X_encoded_df, feature_names=feature_names, show=False)
+    st.pyplot(plt.gcf())
+
+st.markdown("---")
+st.write("### What Else We Can Do")
+
+st.markdown("""
+
+- 🧠 **Churn Root Cause Analysis** – uncover the behaviors or events that lead customers to leave  
+- 🔁 **Lifecycle Segmentation** – understand where each customer stands in their journey  
+- ⏳ **Time-to-Churn Modeling** – predict when a customer is likely to churn, not just if  
+- 📉 **Revenue Impact Forecasting** – estimate lost revenue due to churn before it happens  
+- 📊 **Custom Churn Dashboards** – track churn risk and retention KPIs in real time  
+
+If you’d like a custom analysis on your data, register [here](https://request.holitica.it/) or contact victor@holitica.it. You can also find Holitica on [LinkedIn](https://www.linkedin.com/company/holitica/).
+""")
