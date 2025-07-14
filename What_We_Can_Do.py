@@ -3,9 +3,15 @@ import streamlit as st
 from dotenv import load_dotenv
 import os
 from shared.const import show_side_bar_with_more
+from urllib.parse import parse_qs
 
 show_side_bar_with_more()
 st.set_page_config(page_title="Holitica")
+
+
+query_params = st.experimental_get_query_params()
+page = query_params.get("page", ["home"])[0]
+
 
 st.title("Welcome to Holitica")
 
