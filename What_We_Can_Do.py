@@ -31,7 +31,6 @@ st.markdown("""
 use cases — or try them out with ***your own data***:
 
 - 📊 [Retail Customer Insights](./Retail_Customer_Insights)
-- 🧠 [Customer Persona Discovery](./Customer_Persona_Discovery)
 - 📉 [Understanding Customer Churn](./Understanding_Customer_Churn)
 - 🧩 [User Based Recommendations](./User_Based_Recommendations)
 
