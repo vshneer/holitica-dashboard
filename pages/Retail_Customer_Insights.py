@@ -7,7 +7,7 @@ from shared.form import dataset_form_in_columns
 from shared.rfm import build_rfm
 from shared.const import show_side_bar_with_more
 show_side_bar_with_more()
-st.set_page_config(page_title="Retail Customer Insights", page_icon="📊")
+st.set_page_config(page_title="Retail Customer Insights")
 left, right = st.columns([3, 1])  # Wider left, narrower right
 
 @st.cache_data
