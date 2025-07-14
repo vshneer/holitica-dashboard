@@ -11,5 +11,5 @@ logo = Image.open("holitica-slogan-logo.png")
 
 def show_side_bar_with_more():
     with st.sidebar:
-        st.markdown("""Request a demo [here](https//:request.holitica.it/)""")
+        st.markdown("""Request a demo [here](https://request.holitica.it/)""")
         st.image(logo)
