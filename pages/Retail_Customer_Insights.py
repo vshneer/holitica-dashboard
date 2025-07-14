@@ -206,8 +206,6 @@ st.markdown("---")
 st.write("### What Else We Can Do")
 
 st.markdown("""
-We offer tailored data analysis and modeling services to help you grow your online business.  
-Here are just a few ways we can take:
 
 - 🔍 **Advanced Customer Segmentation** – go beyond RFM with behavioral and lifecycle models
 - 📦 **Product Affinity Analysis** – find which products are bought together or drive repeat purchases
@@ -215,5 +213,5 @@ Here are just a few ways we can take:
 - 🧠 **Churn Prediction** – identify who is likely to stop buying and what you can do about it
 - 📈 **Custom Dashboards** – get visual, up-to-date insights on demand
 
-If you’d like a custom analysis on your store data, contact victor.shneer@gmail.com or message Holitica on LinkedIn.
+If you’d like a custom analysis on your data register [here](https://request.holitica.it/) or contact victor@holitica.it. Also you can find Holitica on [LinkedIn](https://www.linkedin.com/company/holitica/).
 """)
